@@ -71,15 +71,6 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Enter key for multiplayer guess input
-document.addEventListener('keydown', (e) => {
-  if (App.currentScreen === 'mpGameScreen' && e.key === 'Enter') {
-    const input = document.getElementById('mpGuessInput');
-    if (input && input === document.activeElement) {
-      MP.guessFullWord(input.value);
-      input.value = '';
-    }
-  }
-});
+
 
 

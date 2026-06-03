@@ -78,6 +78,7 @@ io.on('connection', (socket) => {
       totalRounds: 3,
       currentMaster: null,
       currentWord: null,
+      currentHint: null,
       guessedLetters: [],
       wrongGuesses: [],
       wordState: null,
@@ -171,7 +172,7 @@ io.on('connection', (socket) => {
     console.log(`Room ${roomCode}: Round ${room.currentRound}, Master is ${master.name}`);
   }
 
-  socket.on('set-word', ({ roomCode, word }) => {
+  socket.on('set-word', ({ roomCode, word, hint }) => {
     const room = getRoom(roomCode);
     if (!room) return;
     if (room.currentMaster !== socket.id) return;
@@ -180,19 +181,26 @@ io.on('connection', (socket) => {
     if (cleanWord.length < 2) return;
 
     room.currentWord = cleanWord;
+    room.currentHint = hint || '';
     room.guessedLetters = [];
     room.wrongGuesses = [];
     room.wordState = cleanWord.split('').map(l => l + ':0');
 
     socket.emit('master-word-set', {});
 
-    // Broadcast masked state to all (including master for display)
     io.to(roomCode).emit('word-set', {
       wordState: getMaskedWordState(room),
-      wrongGuesses: []
+      wrongGuesses: [],
+      hintAvailable: !!room.currentHint
     });
 
     console.log(`Room ${roomCode}: Word set to "${cleanWord}"`);
+  });
+
+  socket.on('request-hint', ({ roomCode }) => {
+    const room = getRoom(roomCode);
+    if (!room || !room.currentHint) return;
+    socket.emit('hint-reveal', { hint: room.currentHint });
   });
 
   socket.on('guess-letter', ({ roomCode, letter }) => {

@@ -74,6 +74,9 @@ const MP = {
       document.getElementById('mpMasterInput').style.display = 'none';
       document.getElementById('mpMasterWaiting').style.display = 'none';
       document.getElementById('mpGuesserArea').style.display = 'block';
+      document.getElementById('mpHintBtn').disabled = true;
+      document.getElementById('mpHintBtn').textContent = '💡 Hint';
+      document.getElementById('mpHintText').textContent = '';
       this.isGuesserView = false;
       this.currentWord = '';
       this.clearHangman();
@@ -91,6 +94,16 @@ const MP = {
       this.renderMPWrongLetters();
       this.renderMPHangman(this.wrongLetters.length);
       this.updateKeyboardState();
+      const hintBtn = document.getElementById('mpHintBtn');
+      if (data.hintAvailable) {
+        hintBtn.disabled = false;
+        hintBtn.textContent = '💡 Get Hint';
+      }
+    });
+    this.socket.on('hint-reveal', (data) => {
+      document.getElementById('mpHintText').textContent = data.hint;
+      document.getElementById('mpHintBtn').disabled = true;
+      document.getElementById('mpHintBtn').textContent = '💡 Hint used';
     });
     this.socket.on('master-word-set', () => {
       if (this.isMaster) {
@@ -210,13 +223,16 @@ const MP = {
     document.getElementById('mpMasterWaiting').style.display = 'none';
     document.getElementById('mpGuesserArea').style.display = 'block';
     document.getElementById('mpWordInput').value = '';
+    document.getElementById('mpHintInput').value = '';
     document.getElementById('mpWordError').style.display = 'none';
     document.getElementById('mpSubmitWordBtn').disabled = false;
   },
 
   submitWord() {
-    const input = document.getElementById('mpWordInput');
-    const word = input.value.trim().toUpperCase();
+    const wordInput = document.getElementById('mpWordInput');
+    const hintInput = document.getElementById('mpHintInput');
+    const word = wordInput.value.trim().toUpperCase();
+    const hint = hintInput.value.trim();
     if (word.length < 2) {
       document.getElementById('mpWordError').textContent = 'Word must be at least 2 letters';
       document.getElementById('mpWordError').style.display = 'block';
@@ -231,7 +247,7 @@ const MP = {
     this.currentWord = word;
     this.wordSubmitted = true;
     document.getElementById('mpSubmitWordBtn').disabled = true;
-    this.socket.emit('set-word', { roomCode: this.roomCode, word });
+    this.socket.emit('set-word', { roomCode: this.roomCode, word, hint });
   },
 
   toggleGuesserView() {
@@ -250,9 +266,8 @@ const MP = {
     this.socket.emit('guess-letter', { roomCode: this.roomCode, letter });
   },
 
-  guessFullWord(word) {
-    if (this.isMaster && !this.isGuesserView) return;
-    this.socket.emit('guess-full-word', { roomCode: this.roomCode, word: word.toUpperCase() });
+  requestHint() {
+    this.socket.emit('request-hint', { roomCode: this.roomCode });
   },
 
   renderMPWordDisplay() {

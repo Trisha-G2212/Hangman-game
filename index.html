@@ -169,8 +169,9 @@
       <div id="mpMasterInput" style="display:none">
         <div class="lobby-card word-master-input">
           <h2>✍️ Set the Word</h2>
-          <p>You are the Word Master! Enter a word for others to guess.</p>
-          <input type="text" id="mpWordInput" maxlength="20" placeholder="Enter a word..." autocomplete="off" style="text-transform:uppercase">
+          <p>You are the Word Master! Enter a word and an optional hint for others.</p>
+          <input type="text" id="mpWordInput" maxlength="20" placeholder="Enter a word..." autocomplete="off" style="text-transform:uppercase;margin-bottom:10px">
+          <input type="text" id="mpHintInput" maxlength="60" placeholder="Optional hint (e.g. 'A type of animal')..." autocomplete="off">
           <button class="submit-word" id="mpSubmitWordBtn" onclick="MP.submitWord()">Set Word</button>
           <p id="mpWordError" style="color:var(--danger);font-size:0.85rem;margin-top:8px;display:none"></p>
         </div>
@@ -212,14 +213,16 @@
 
           <div class="word-display" id="mpWordDisplay"></div>
 
+          <div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap">
+            <button class="hint-btn" id="mpHintBtn" onclick="MP.requestHint()" disabled>💡 Hint</button>
+            <div class="hint-text" id="mpHintText" style="font-size:0.9rem"></div>
+          </div>
+
           <div class="wrong-letters" id="mpWrongLetters">
             <span class="label">Wrong:</span>
           </div>
 
-          <div style="display:flex;gap:8px;justify-content:center;margin-top:4px">
-            <input type="text" id="mpGuessInput" maxlength="30" placeholder="Type a letter or word..." autocomplete="off" style="padding:8px 14px;border:2px solid #dfe6e9;border-radius:10px;font-size:1rem;font-family:inherit;outline:none;width:200px;text-transform:uppercase;text-align:center">
-            <button onclick="var i=document.getElementById('mpGuessInput');MP.guessFullWord(i.value);i.value=''" style="padding:8px 16px;border:none;border-radius:10px;background:var(--accent);color:white;font-weight:700;cursor:pointer;font-family:inherit">Guess</button>
-          </div>
+          <div class="keyboard" id="mpKeyboard"></div>
 
           <div class="guess-notification" id="mpGuessNotif" style="display:none"></div>
         </div>
